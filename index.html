@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeoGuard Core | Verified Presence</title>
+    <style>
+        /* --- GITHUB DARK THEME VARIABLES --- */
+        :root {
+            --gh-bg: #0d1117;
+            --gh-bg-secondary: #161b22;
+            --gh-border: #30363d;
+            --gh-text-main: #c9d1d9;
+            --gh-text-muted: #8b949e;
+            --gh-btn-green: #238636;
+            --gh-btn-green-hover: #2ea043;
+            --gh-link: #58a6ff;
+            --gh-danger: #f85149;
+            --gh-input-bg: #010409;
+        }
+
+        body {
+            background-color: var(--gh-bg);
+            color: var(--gh-text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* --- HEADER --- */
+        .gh-header {
+            width: 100%;
+            background-color: var(--gh-bg-secondary);
+            border-bottom: 1px solid var(--gh-border);
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .gh-logo {
+            font-weight: bold;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .gh-logo span { color: var(--gh-text-main); }
+        .gh-badge {
+            background: var(--gh-border);
+            color: var(--gh-text-muted);
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 2em;
+            border: 1px solid var(--gh-border);
+        }
+
+        /* --- CONTAINER --- */
+        .container {
+            max-width: 400px;
+            width: 90%;
+            margin-top: 60px;
+        }
+
+        /* --- CARD COMPONENT --- */
+        .gh-card {
+            background-color: var(--gh-bg-secondary);
+            border: 1px solid var(--gh-border);
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .gh-card-header {
+            text-align: center;
+            font-size: 20px;
+            font-weight: 500;
+            margin-bottom: 20px;
+            color: var(--gh-text-main);
+        }
+
+        /* --- ERROR BANNER --- */
+        .flash-error {
+            background-color: rgba(248, 81, 73, 0.1);
+            border: 1px solid rgba(248, 81, 73, 0.4);
+            color: var(--gh-danger);
+            padding: 15px;
+            border-radius: 6px;
+            font-size: 13px;
+            margin-bottom: 20px;
+            display: none; /* Hidden by default */
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* --- FORMS & INPUTS --- */
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--gh-text-main);
+        }
+
+        .gh-input {
+            width: 100%;
+            background-color: var(--gh-input-bg);
+            border: 1px solid var(--gh-border);
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 16px;
+            color: var(--gh-text-main);
+            margin-bottom: 16px;
+            box-sizing: border-box;
+            outline: none;
+        }
+        .gh-input:focus {
+            border-color: var(--gh-link);
+            box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.3);
+        }
+
+        /* --- BUTTONS --- */
+        .gh-btn {
+            width: 100%;
+            background-color: var(--gh-btn-green);
+            color: white;
+            border: 1px solid rgba(240, 246, 252, 0.1);
+            border-radius: 6px;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-top: 10px;
+        }
+        .gh-btn:hover { background-color: var(--gh-btn-green-hover); }
+        .gh-btn:disabled { background-color: var(--gh-border); cursor: not-allowed; color: var(--gh-text-muted); }
+
+        .gh-btn-secondary {
+            background-color: transparent;
+            color: var(--gh-link);
+            border: none;
+            font-size: 14px;
+            padding: 0;
+            cursor: pointer;
+        }
+        .gh-btn-secondary:hover { text-decoration: underline; }
+
+        /* --- UTILS --- */
+        .text-small { font-size: 12px; color: var(--gh-text-muted); }
+        .mt-2 { margin-top: 15px; }
+        .d-none { display: none; }
+        
+        /* --- CAPTCHA BOX --- */
+        .captcha-container {
+            border: 1px solid var(--gh-border);
+            background: #0d1117;
+            border-radius: 6px;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+        .captcha-code {
+            font-family: monospace;
+            font-weight: bold;
+            font-size: 20px;
+            letter-spacing: 4px;
+            color: #c9d1d9;
+            user-select: none; /* Prevent easy copying */
+        }
+        
+        /* Clean Logs */
+        .clean-log {
+            font-family: "SFMono-Regular", Consolas, monospace;
+            font-size: 12px;
+            color: var(--gh-text-muted);
+            background: #0d1117;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid var(--gh-border);
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="gh-header">
+        <div class="gh-logo">
+            <svg height="32" viewBox="0 0 16 16" width="32" fill="white"><path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"></path></svg>
+            <span>GeoGuard</span>
+            <span class="gh-badge">Core</span>
+        </div>
+        <div style="font-size: 14px; font-weight: bold; color: var(--gh-text-main);">v1.0.6</div>
+    </header>
+
+    <div class="container">
+
+        <div id="auth-view" class="gh-card">
+            <div class="gh-card-header" id="auth-title">
+                Sign in to GeoGuard
+            </div>
+            
+            <div id="auth-error" class="flash-error">
+                <svg class="octicon" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true" fill="currentColor"><path fill-rule="evenodd" d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zm9 3a1 1 0 11-2 0 1 1 0 012 0zm-.25-6.25a.75.75 0 00-1.5 0v3.5a.75.75 0 001.5 0v-3.5z"></path></svg>
+                <span id="error-msg">Incorrect username or password.</span>
+            </div>
+            
+            <form id="loginForm" onsubmit="handleAuth(event, 'login')">
+                <label for="login-user">Username</label>
+                <input type="text" id="login-user" class="gh-input" value="admin">
+
+                <label for="login-pass">Password</label>
+                <input type="password" id="login-pass" class="gh-input" value="">
+
+                <div class="captcha-container">
+                    <span class="captcha-code" id="captcha-display">X7K9M</span>
+                    <input type="text" id="login-captcha" class="gh-input" placeholder="Type Code" style="width: 120px; margin-bottom: 0; text-align: center;" required>
+                </div>
+
+                <button type="submit" class="gh-btn">Sign in</button>
+            </form>
+
+            <form id="signupForm" class="d-none" onsubmit="handleAuth(event, 'signup')">
+                <label for="reg-user">Username (starts with @)</label>
+                <input type="text" id="reg-user" class="gh-input" placeholder="@johndoe" required>
+
+                <label for="reg-email">Email address</label>
+                <input type="email" id="reg-email" class="gh-input" placeholder="name@example.com" required>
+
+                <label for="reg-pass">Create Password</label>
+                <input type="password" id="reg-pass" class="gh-input" required>
+                
+                <label>Verification Code</label>
+                <div class="captcha-container">
+                    <span class="captcha-code">X7K9M</span>
+                    <input type="text" id="reg-captcha" class="gh-input" placeholder="Type Code" style="width: 120px; margin-bottom: 0; text-align: center;" required>
+                </div>
+
+                <button type="submit" class="gh-btn">Create Account</button>
+            </form>
+            
+            <div class="text-small mt-2" style="text-align: center; border-top: 1px solid var(--gh-border); padding-top: 20px;">
+                <span id="toggle-text">New here? </span> 
+                <button onclick="toggleAuthMode()" class="gh-btn-secondary" id="auth-toggle">Create an account</button>
+            </div>
+        </div>
+
+        <div id="dashboard-view" class="d-none">
+            <div id="status-alert" class="gh-card" style="border-color: rgba(56, 139, 253, 0.4); background: rgba(56, 139, 253, 0.1);">
+                <div style="font-weight: bold; color: #58a6ff; margin-bottom: 5px;" id="status-title">System Ready</div>
+                <div style="font-size: 13px;" id="status-desc">Click button below to verify location.</div>
+            </div>
+
+            <div class="gh-card">
+                <div class="gh-card-header" style="display: flex; justify-content: space-between; border-bottom: none; padding-bottom: 0; margin-bottom: 10px;">
+                    <span>📍 Check In</span>
+                </div>
+                
+                <div style="padding: 10px 0;">
+                    <div class="clean-log">
+                        <div id="log-text">Status: Pending user action...</div>
+                        <div id="coords-text" style="color: var(--gh-link); margin-top: 5px;"></div>
+                    </div>
+
+                    <button id="btnAttend" class="gh-btn" onclick="startAttendance()">
+                        Verify Presence
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let isLoginMode = true;
+
+// Fungsi Load Captcha saat halaman dibuka
+async function refreshCaptcha() {
+    const res = await fetch('/api/get_captcha');
+    const data = await res.json();
+    document.querySelectorAll('.captcha-code').forEach(el => el.innerText = data.captcha);
+}
+window.onload = refreshCaptcha;
+
+async function handleAuth(e, type) {
+    e.preventDefault();
+    const btn = e.target.querySelector('button[type="submit"]');
+    const originalText = btn.innerText;
+    btn.disabled = true;
+    btn.innerText = "Processing...";
+
+    const payload = {
+        username: (type === 'login') ? document.getElementById('login-user').value : document.getElementById('reg-user').value,
+        password: (type === 'login') ? document.getElementById('login-pass').value : document.getElementById('reg-pass').value,
+        captcha: (type === 'login') ? document.getElementById('login-captcha').value : document.getElementById('reg-captcha').value
+    };
+
+    const endpoint = (type === 'login') ? '/api/login' : '/api/register';
+    
+    try {
+        const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(payload)
+        });
+        const result = await response.json();
+
+        if (response.ok) {
+            if (type === 'signup') {
+                alert(result.message); // "Akun berhasil dibuat! Silahkan login."
+                toggleAuthMode(); // Pindah ke halaman login
+                refreshCaptcha();
+            } else {
+                // Login Success
+                document.getElementById('auth-view').classList.add('d-none');
+                document.getElementById('dashboard-view').classList.remove('d-none');
+            }
+        } else {
+            showError(result.message);
+            refreshCaptcha();
+        }
+    } catch (err) {
+        showError("Server Error. Pastikan server Flask jalan.");
+    } finally {
+        btn.disabled = false;
+        btn.innerText = originalText;
+    }
+}
+
+// ... (sisanya fungsi startAttendance tetap sama) ...
+
+        
+        let isLoginMode = true;
+        const CORRECT_CAPTCHA = "X7K9M";
+        
+        // MOCK DATABASE (For demo validation)
+        const MOCK_DB = {
+            users: [
+                { user: "admin", pass: "password" },
+                { user: "user1", pass: "123456" }
+            ]
+        };
+
+        function toggleAuthMode() {
+            // Clear errors when switching
+            document.getElementById('auth-error').style.display = 'none';
+            
+            isLoginMode = !isLoginMode;
+            const authTitle = document.getElementById('auth-title');
+            const loginForm = document.getElementById('loginForm');
+            const signupForm = document.getElementById('signupForm');
+            const toggleLink = document.getElementById('auth-toggle');
+            const toggleText = document.getElementById('toggle-text');
+
+            if (isLoginMode) {
+                authTitle.innerText = "Sign in to GeoGuard";
+                loginForm.classList.remove('d-none');
+                signupForm.classList.add('d-none');
+                toggleText.innerText = "New here? ";
+                toggleLink.innerText = "Create an account";
+            } else {
+                authTitle.innerText = "Create your account";
+                loginForm.classList.add('d-none');
+                signupForm.classList.remove('d-none');
+                toggleText.innerText = "Already have an account? ";
+                toggleLink.innerText = "Sign in";
+            }
+        }
+
+        function handleAuth(e, type) {
+            e.preventDefault();
+            
+            // UI Elements
+            const errorBox = document.getElementById('auth-error');
+            const errorMsg = document.getElementById('error-msg');
+            const btn = e.target.querySelector('button[type="submit"]');
+            
+            // Reset Error
+            errorBox.style.display = 'none';
+            const originalText = btn.innerText;
+            btn.disabled = true;
+            btn.innerText = "Verifying...";
+
+            // --- 1. CAPTCHA CHECK ---
+             userCaptcha = "";
+            if (type === 'login') {
+                userCaptcha = document.getElementById('login-captcha').value;
+            } else {
+                userCaptcha = document.getElementById('reg-captcha').value;
+            }
+let
+            if (userCaptcha !== CORRECT_CAPTCHA) {
+                showError("Verification code (Captcha) is incorrect.");
+                resetBtn(btn, originalText);
+                return;
+            }
+
+            // --- 2. CREDENTIAL CHECK ---
+            setTimeout(() => {
+                let isValid = false;
+
+                if (type === 'login') {
+                    const userInput = document.getElementById('login-user').value;
+                    const passInput = document.getElementById('login-pass').value;
+
+                    // Check Mock DB
+                    const userFound = MOCK_DB.users.find(u => u.user === userInput);
+                    
+                    if (!userFound) {
+                        showError("Account does not exist.");
+                        resetBtn(btn, originalText);
+                        return;
+                    } 
+                    
+                    if (userFound.pass !== passInput) {
+                        showError("Incorrect password.");
+                        resetBtn(btn, originalText);
+                        return;
+                    }
+                    
+                    isValid = true; // Login Success
+
+                } else {
+                    // Signup Logic (Simulate existing user check)
+                    const userInput = document.getElementById('reg-user').value;
+                    if (MOCK_DB.users.find(u => u.user === userInput.replace("@",""))) {
+                        showError("Username is already taken.");
+                        resetBtn(btn, originalText);
+                        return;
+                    }
+                    isValid = true; // Signup Success
+                }
+
+                if (isValid) {
+                    // PROCEED TO DASHBOARD
+                    document.getElementById('auth-view').classList.add('d-none');
+                    document.getElementById('dashboard-view').classList.remove('d-none');
+                }
+            }, 800);
+        }
+
+        function showError(msg) {
+            const errorBox = document.getElementById('auth-error');
+            const errorMsg = document.getElementById('error-msg');
+            errorMsg.innerText = msg;
+            errorBox.style.display = 'flex';
+        }
+
+        function resetBtn(btn, text) {
+            btn.disabled = false;
+            btn.innerText = text;
+        }
+
+        /* --- ATTENDANCE LOGIC (Same as before) --- */
+        const statusAlert = document.getElementById('status-alert');
+        const statusTitle = document.getElementById('status-title');
+        const statusDesc = document.getElementById('status-desc');
+        const logText = document.getElementById('log-text');
+        const coordsText = document.getElementById('coords-text');
+        const btnAttend = document.getElementById('btnAttend');
+
+        function startAttendance() {
+            btnAttend.disabled = true;
+            btnAttend.innerText = "Locating...";
+            logText.innerText = "Requesting GPS Access...";
+
+            if (!navigator.geolocation) {
+                logText.innerText = "Error: Geolocation not supported.";
+                return;
+            }
+            navigator.geolocation.getCurrentPosition(success, error, { enableHighAccuracy: true });
+        }
+
+        function success(position) {
+            const lat = position.coords.latitude.toFixed(5);
+            const lon = position.coords.longitude.toFixed(5);
+            coordsText.innerText = `Lat: ${lat} | Lon: ${lon}`;
+            logText.innerText = "Sending data to server...";
+            
+            setTimeout(() => {
+                statusAlert.style.background = "rgba(46,160,67,0.15)";
+                statusAlert.style.borderColor = "rgba(63,185,80,0.4)";
+                statusTitle.innerText = "✅ Verified";
+                statusTitle.style.color = "#3fb950";
+                statusDesc.innerText = "Attendance marked successfully.";
+                logText.innerText = "Server Response: 200 OK (Valid)";
+                logText.style.color = "#3fb950";
+                btnAttend.innerText = "Checked In";
+            }, 1500);
+        }
+
+        function error() {
+            logText.innerText = "Error: Permission denied.";
+            btnAttend.disabled = false;
+            btnAttend.innerText = "Retry";
+        }
+    </>
+</body>
+</html>

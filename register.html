@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Join GeoGuard</title>
+    <style>
+        /* --- GITHUB DARK THEME (Shared CSS) --- */
+        :root {
+            --gh-bg: #0d1117;
+            --gh-bg-secondary: #161b22;
+            --gh-border: #30363d;
+            --gh-text-main: #c9d1d9;
+            --gh-text-muted: #8b949e;
+            --gh-btn-green: #238636;
+            --gh-btn-green-hover: #2ea043;
+            --gh-input-bg: #010409;
+            --gh-link: #58a6ff;
+            --gh-danger: #f85149;
+        }
+
+        body {
+            background-color: var(--gh-bg);
+            color: var(--gh-text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .gh-logo { margin-bottom: 25px; fill: white; }
+        
+        .title {
+            font-size: 24px;
+            font-weight: 300;
+            margin-bottom: 20px;
+            color: var(--gh-text-main);
+        }
+
+        /* --- CARD STYLE --- */
+        .auth-card {
+            background-color: var(--gh-bg-secondary);
+            border: 1px solid var(--gh-border);
+            border-radius: 6px;
+            padding: 20px;
+            width: 100%;
+            max-width: 350px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        /* --- INPUTS --- */
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .gh-input {
+            width: 100%;
+            background-color: var(--gh-input-bg);
+            border: 1px solid var(--gh-border);
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 14px;
+            color: var(--gh-text-main);
+            margin-bottom: 16px;
+            box-sizing: border-box;
+            outline: none;
+        }
+        .gh-input:focus {
+            border-color: var(--gh-link);
+            box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.3);
+        }
+
+        /* --- CAPTCHA BOX --- */
+        .captcha-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--gh-bg);
+            border: 1px solid var(--gh-border);
+            border-radius: 6px;
+            padding: 10px;
+            margin-bottom: 16px;
+        }
+        .captcha-code {
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            font-size: 20px;
+            letter-spacing: 4px;
+            background: #21262d;
+            padding: 5px 10px;
+            border-radius: 4px;
+            color: var(--gh-text-main);
+            user-select: none; /* Prevent copy-paste */
+        }
+
+        /* --- BUTTON --- */
+        .gh-btn {
+            width: 100%;
+            background-color: var(--gh-btn-green);
+            color: white;
+            border: 1px solid rgba(240, 246, 252, 0.1);
+            border-radius: 6px;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .gh-btn:hover { background-color: var(--gh-btn-green-hover); }
+
+        /* --- ALERTS --- */
+        .alert {
+            font-size: 13px;
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid;
+            display: none;
+        }
+        .alert-error {
+            background: rgba(248,81,73,0.1);
+            border-color: rgba(248,81,73,0.4);
+            color: var(--gh-danger);
+        }
+
+        .login-link {
+            margin-top: 20px;
+            font-size: 12px;
+            padding: 15px;
+            border: 1px solid var(--gh-border);
+            border-radius: 6px;
+            width: 100%;
+            max-width: 350px;
+            text-align: center;
+            box-sizing: border-box;
+        }
+        .login-link a { color: var(--gh-link); text-decoration: none; }
+        .login-link a:hover { text-decoration: underline; }
+
+    </style>
+</head>
+<body>
+
+    <svg class="gh-logo" height="48" viewBox="0 0 16 16" width="48"><path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"></path></svg>
+
+    <div class="title">Create your account</div>
+
+    <div class="auth-card">
+        
+        <div id="error-box" class="alert alert-error"></div>
+
+        <form id="signupForm" onsubmit="handleSignup(event)">
+            
+            <label>Username</label>
+            <input type="text" id="reg-username" class="gh-input" placeholder="@johndoe" required>
+
+            <label>Email address</label>
+            <input type="email" id="reg-email" class="gh-input" placeholder="john@example.com" required>
+
+            <label>Password</label>
+            <input type="password" id="reg-password" class="gh-input" required>
+
+            <label>Verify Human</label>
+            <div class="captcha-container">
+                <span class="captcha-code">X7K9M</span>
+                <input type="text" id="reg-captcha" class="gh-input" placeholder="Enter code" style="width: 100px; margin-bottom: 0;" required>
+            </div>
+
+            <button type="submit" id="btn-signup" class="gh-btn">Create account</button>
+        </form>
+    </div>
+
+    <div class="login-link">
+        Already have an account? <a href="/">Sign in</a>.
+    </div>
+
+    <script>
+        function handleSignup(e) {
+            e.preventDefault();
+            
+            const btn = document.getElementById('btn-signup');
+            const errorBox = document.getElementById('error-box');
+            
+            // Clear previous errors
+            errorBox.style.display = 'none';
+            btn.disabled = true;
+            btn.innerText = "Creating account...";
+
+            const payload = {
+                username: document.getElementById('reg-username').value,
+                email: document.getElementById('reg-email').value,
+                password: document.getElementById('reg-password').value,
+                captcha: document.getElementById('reg-captcha').value
+            };
+
+            fetch('/api/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json().then(data => ({status: res.status, body: data})))
+            .then(response => {
+                if (response.status === 200) {
+                    // Success
+                    window.location.href = "/?registered=true";
+                } else {
+                    // Error (Duplicate user, captcha, etc)
+                    throw new Error(response.body.message);
+                }
+            })
+            .catch(err => {
+                errorBox.innerText = "❌ " + err.message;
+                errorBox.style.display = 'block';
+                btn.disabled = false;
+                btn.innerText = "Create account";
+            });
+        }
+    </script>
+</body>
+</html>
